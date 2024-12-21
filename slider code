@@ -1,0 +1,148 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+
+class Third extends StatefulWidget {
+  const Third({super.key});
+
+  @override
+  State<Third> createState() => _ThirdState();
+}
+
+class _ThirdState extends State<Third> {
+  void startTimer() {
+    _timer = Timer.periodic(Duration(seconds: 3), (timer) {
+      if (_pageController.page == imagePaths.length - 1) {
+        //checks if it's on the last image
+        _pageController.animateToPage(
+          0,
+          duration: Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      } else {
+        _pageController.nextPage(
+          duration: Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+  // List of image paths
+  final List<String> imagePaths = [
+    "assests/airgreenfirst.jpg",
+    "assests/airgreensecond.jpg",
+    "assests/airgreenthird.jpg",
+  ];
+
+  late final List<Widget> _pages;
+  int _activePage = 0;
+  final PageController _pageController = PageController(initialPage: 0);
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize pages with images
+    _pages = List.generate(
+      imagePaths.length,
+          (index) => Image.asset(
+        imagePaths[index],
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Center(
+            child: Text(
+              'Image not found',
+              style: TextStyle(color: Colors.red),
+            ),
+          );
+        },
+      ),
+    );
+    startTimer();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        backgroundColor: Colors.white,
+        drawer: Drawer(
+          
+        ),
+        
+        appBar: AppBar(
+actions: [
+  Padding(
+    padding: EdgeInsets.all(15),
+    child: Icon(Icons.wb_sunny,size: 30,),
+
+  ),
+],
+          backgroundColor: Colors.white,
+          title: Text("AIR GPA Calculator",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+          centerTitle: true,
+
+          
+        ),
+        body: Column(
+          children: [
+            Stack(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  height: MediaQuery.of(context).size.height / 3,
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: imagePaths.length,
+                      onPageChanged: (value) {
+                        setState(() {
+                          _activePage = value;
+                        });
+                      },
+                    itemBuilder: (context, index) {
+                      // Return image widget
+                      return _pages[index];
+                    },
+                  ),
+                ),
+                Positioned(
+                  bottom: 10,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    color: Colors.transparent, // Background color for the indicator container
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center, // Align indicators to the center
+                      children: List<Widget>.generate(
+                        _pages.length, // Number of indicators equals the number of pages
+                            (index) => Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 5), // Spacing between indicators
+                          child: InkWell(
+                            onTap: (){
+                              _pageController.animateToPage(
+                                index,
+                                duration: Duration(milliseconds: 300),
+                                curve: Curves.easeIn,
+                              );
+
+                            },
+                            child: CircleAvatar(
+                                radius: 4,
+                                backgroundColor: _activePage == index ? Colors.yellow : Colors.grey,
+                              ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
